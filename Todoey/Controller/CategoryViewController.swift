@@ -36,10 +36,11 @@ class CategoryViewController: SwipeTableViewController {
 
        tableView.backgroundColor = navBarColor
     navBar.backgroundColor = navBarColor
+ 
     navBar.tintColor = UIColor.white
         //   navBar.standardAppearance.configureWithOpaqueBackground()
           navBar.standardAppearance.backgroundColor = navBarColor
-       //   navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColor, returnFlat: true) ]
+    navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.white ]
           
           
     
@@ -100,7 +101,7 @@ class CategoryViewController: SwipeTableViewController {
     
         performSegue(withIdentifier: "goToItems", sender: self)
         
- 
+        tableView.deselectRow(at: indexPath, animated: true)
         
     }
     

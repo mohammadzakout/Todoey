@@ -48,7 +48,10 @@ class TodoeyVirewController: SwipeTableViewController  {
             guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controller does not exist.")}
            
             if let navBarColor = UIColor(hexString:colorHex){
-             searchBar.barTintColor = navBarColor
+                searchBar.barTintColor = UIColor(hexString: colorHex)
+                searchBar.searchTextField.backgroundColor = .white
+                
+                
                 tableView.backgroundColor = navBarColor
                 navBar.backgroundColor = navBarColor
                 navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
