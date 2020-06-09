@@ -7,86 +7,120 @@
 //
 
 import UIKit
-
-import CoreData
-
-class CategoryViewController: UITableViewController {
+import RealmSwift
+import SwipeCellKit
+import ChameleonFramework
+class CategoryViewController: SwipeTableViewController {
     
-    
-    var categories : [Category] = [Category]()
+    let realm =  try! Realm()
+    var categories : Results<Category>?
 
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-       loadCategories()
+      loadCategories()
+        tableView.separatorStyle = .none
     }
+    
+    
+   override func viewWillAppear(_ animated: Bool) {
+       
+     
+            
+     guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controller does not exist.")}
+            
+        let navBarColor = UIColor(hexString: "1D9BF6")
+    navBar.backgroundColor = navBarColor
+         
+
+       tableView.backgroundColor = navBarColor
+    navBar.backgroundColor = navBarColor
+    navBar.tintColor = UIColor.white
+        //   navBar.standardAppearance.configureWithOpaqueBackground()
+          navBar.standardAppearance.backgroundColor = navBarColor
+       //   navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColor, returnFlat: true) ]
+          
+          
+    
+    
+    
+    
+    
+    
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     // MARK: - Table view data source
 
        override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-         categories.count
+         categories?.count ?? 1
      }
      
      override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-         let  item = categories[indexPath.row]
-         cell.textLabel?.text = item.name
-         
-     
-         
-         
+        let cell = super.tableView(tableView ,cellForRowAt: indexPath)
+            
+        if let catagory = categories?[indexPath.row]{
+         cell.textLabel?.text = catagory.name
+    cell.backgroundColor = UIColor(hexString: catagory.cellCollor )
+        
+            if let color = UIColor(hexString: catagory.cellCollor ){
+                        
+                          cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+                          
+                      }
+            
+            
+            
+        
+        }
          return cell
      }
    
+    
+    
+
+    
+    
     //MARK: - Add Delegate Methods
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+    
         performSegue(withIdentifier: "goToItems", sender: self)
         
-      
-        
-        
+ 
         
     }
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
+
        let destintionVC = segue.destination as! TodoeyVirewController
-        
+
         if  let indexPath = tableView.indexPathForSelectedRow {
-            destintionVC.category = categories[indexPath.row]
-                 
-                  
+            destintionVC.selectedCategory = categories?[indexPath.row]
+
+
               }
-        
-        
-        
+
+
+
     }
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
  //MARK: - Add New Data
     
@@ -101,10 +135,11 @@ class CategoryViewController: UITableViewController {
                 
                 if (textField.text! != ""){
                    
-                    let category = Category(context: self.context)
-                    category.name = textField.text!
-                    self.categories.append(category)
-                    self.saveCategory()
+                    let newCategory = Category()
+                    newCategory.name = textField.text!
+                    newCategory.cellCollor = (UIColor.randomFlat()).hexValue()
+print(newCategory.cellCollor)
+                    self.save(category : newCategory)
                     
                     
                 }
@@ -127,29 +162,27 @@ class CategoryViewController: UITableViewController {
     
     
     
-    //MARK: -Data Manipulation Methods
+    //MARK: - Data Manipulation Methods
 
-    func loadCategories(with request : NSFetchRequest<Category> = Category.fetchRequest()){
+    func loadCategories(){
 
-        
-        
-        do {
-            categories = try context.fetch(request)
-        } catch  {
-            
-        }
+   categories = realm.objects(Category.self)
+      
 
-   
 
     }
     
     
     
     
-    func saveCategory() {
+    func save(category : Category) {
         
         do {
-            try context.save()
+            try realm.write{
+                realm.add(category)
+                
+                
+            }
             
         }catch{
             
@@ -159,7 +192,33 @@ class CategoryViewController: UITableViewController {
         
     }
     
+
+
+
+
+override func updateModel(at indexPath : IndexPath){
+    
+     
+             if let categoryForDeletion = categories?[indexPath.row] {
+              
+                 do {
+                     try realm.write{
+                    realm.delete(categoryForDeletion)
+                                   
+                                   
+                               }
+                               
+                           }catch{
+                               
+                           }
+    
+     
+                 
+             }
     
     
+}
+
 
 }
+
